@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Analysis Agent</title>
+</head>
+<body>
+    <h1>CSV Analysis Agent</h1>
+    <textarea id="csv" >https://people.sc.fsu.edu/~jburkardt/data/csv/homes.csv</textarea>
+    <textarea id="question" >Whats the average price of a three bed house?</textarea>
+    <button id="Ask">Query CSV</button>
+    <div id="output_png"></div>
+    <div id="output_text"></div>
+    <div id="output_python"><div></div>
+    
+    <script>
+        document.getElementById('Ask').addEventListener('click', function() {
+            const csvUrl = document.getElementById('csv').value;
+            const question = document.getElementById('question').value;
+            
+            fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    csv: csvUrl,
+                    question: question
+                })
+            })
+            .then(response => response.text())
+            .then(data => {
+                const json = JSON.parse(data);
+                document.getElementById('output_text').innerText = json['text'];
+                document.getElementById('output_png').innerHTML = `<img src="${json['png']}" />`;
+                document.getElementById('output_python').innerText = json['python'];
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
