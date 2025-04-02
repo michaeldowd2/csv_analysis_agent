@@ -100,7 +100,7 @@ def clean_python_code(code: str) -> str:
 def execute_python_code(state: State, config: RunnableConfig) -> Dict[str, Any]:
     """Execute the generated Python code."""
 
-    python_path = str(Path(__file__).resolve().parent.parent.parent / ('output' + '/' + state.file_guid + '.py'))
+    python_path = str(Path(__file__).resolve().parent.parent / ('static' + '/' + state.file_guid + '.py'))
 
     try:
         with open(python_path, 'w') as f:
@@ -110,9 +110,7 @@ def execute_python_code(state: State, config: RunnableConfig) -> Dict[str, Any]:
         def prt(*args, **kwargs):
             output.append(' '.join(map(str, args)))
 
-        exec_globals = {
-            'print': prt
-        }
+        exec_globals = { 'print': prt }
         
         exec(state.generated_python_code, exec_globals)
         return {"python_path": python_path, "output": str(output)}
@@ -145,6 +143,7 @@ Generate complete, functioning Python code that:
 3. Uses pandas to process the data
 4. Directly answers the user's question with appropriate data manipulation
 5. MUST include print statements to display the results to the user
+6. Charts should show a series of data, not just one value. Choose an appropriate series for the user question, e.g. if they request a mean, you could show a histogram of all values with the mean highlighted.
 
 IMPORTANT GUIDELINES:
 - The code must fully answer the user's question, not just load the data
@@ -152,11 +151,11 @@ IMPORTANT GUIDELINES:
 - DO NOT include placeholders like '# Code to answer question here'
 - The 'csv_path' variable is already defined; do not redefine it
 - Always include necessary imports at the top of the file
-- Make sure the final result is clearly printed or visualized
 - Do NOT wrap your code in markdown code blocks (no ```python or ``` tags)
 - Double-check your code against the available column names in the CSV file
-- Make sure to use the correct column names in the code
-- Do NOT include a plt.show() line. DO include plt.savefig(chart_path)
+- Use the correct column names in the code
+- Do NOT include a plt.show() line, the code should run and save the chart
+- DO include plt.savefig(chart_path).
 
 EXAMPLE SOLUTION:
 For the question "What are the top 3 products by total sales?" with a sales dataset containing 'product_name' and 'sales' columns:
@@ -193,7 +192,7 @@ DO NOT include any commentary, explanations, or markdown. ONLY output valid Pyth
         code = chain.invoke({})
 
         file_guid = str(uuid.uuid4())
-        chart_path = str(Path(__file__).resolve().parent.parent.parent / ('output' + '/' + file_guid + '.png')).replace('\\','\\\\')
+        chart_path = str(Path(__file__).resolve().parent.parent / ('static' + '/' + file_guid + '.png')).replace('\\','\\\\')
         if isinstance(state.csv_path, str) and validate_url(state.csv_path):
             code = f"# Define the URL to the CSV file\ncsv_path = '{state.csv_path}'\nchart_path = '{chart_path}'\n{code}"
         else:
@@ -201,7 +200,7 @@ DO NOT include any commentary, explanations, or markdown. ONLY output valid Pyth
             code = f"# Define the path to the CSV file\ncsv_path = '{abs_path}'\nchart_path = '{chart_path}'\n\n{code}"
         
         code = clean_python_code(code)
-        return {"generated_python_code": code, "file_guid": file_guid, "chart_path": chart_path}
+        return {"generated_python_code": code, "file_guid": file_guid, "chart_path": '/static/' + file_guid + '.png'}
     except Exception as e:
         return {"error_message": f"Error generating code: {str(e)}"}
 

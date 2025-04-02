@@ -1,7 +1,6 @@
 from flask import Flask, render_template, jsonify, request
-import json
-from src.agent.graph import graph
-from src.agent.state import State
+from agent.graph import graph
+from agent.state import State
 
 app = Flask(__name__)
 
@@ -40,9 +39,9 @@ def run_analysis():
     
     # Prepare response
     response = {
-        'text': result.get('output'),
+        'text': result.get('output').replace('[', '').replace(']','').replace("'",''),
         'png': result.get('chart_path'),
-        'python': result.get('python_path')
+        'python': result.get('generated_python_code')
     }
     
     return jsonify(response)

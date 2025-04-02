@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from agent.graph import graph
 from agent.state import State
 from agent.configuration import Configuration
+from IPython.display import Image, display
+from langchain_core.runnables.graph import CurveStyle, MermaidDrawMethod, NodeStyles
 
 
 def main():
@@ -69,6 +71,7 @@ def main():
     print(f"Processing CSV source: {csv_source}")
     print(f"Question: {user_input}")
     print("Generating code...\n")
+    print('graph name: ' + graph.name)
     
     result = graph.invoke(initial_state, config)
     
